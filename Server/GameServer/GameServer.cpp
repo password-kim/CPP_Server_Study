@@ -1,43 +1,67 @@
 ﻿#include "pch.h"
 #include <iostream>
 #include "CorePch.h"
-
 #include <thread>
+#include <atomic>
+#include <mutex>
+#include <algorithm>
 
-void HelloThread()
-{
-    cout << "Hello Thread" << endl;
-}
+vector<int32> v;
 
-void HelloThread_2(int32 num)
+// Mutual Exclusive (상호배타적)
+mutex m; // 자물쇠 역할
+
+// RAII (Resource Acquisition Is Initialization)
+template<typename T> 
+class LockGuard // 표준->lock_guard
 {
-    cout << num << endl;
+public:
+    LockGuard(T& m)
+    {
+        _mutex = &m;
+        _mutex->lock();
+    }
+
+    ~LockGuard()
+    {
+        _mutex->unlock();
+    }
+
+public:
+    T* _mutex;
+};
+
+void Push()
+{
+    for (int32 i = 0; i < 10000; i++)
+    {
+        // 자물쇠를 자동으로 잠그고 풀어주는것
+        //LockGuard<mutex> lockGuard(m); 
+        lock_guard<mutex> lockGuard(m);
+
+        
+        //m.lock(); // 자물쇠 잠그기
+
+        v.push_back(i);
+
+        if (i == 5000)
+            break;
+
+
+        //m.unlock(); // 자물쇠 풀기
+
+    }
 }
 
 int main()
 {
+    thread t1(Push);
+    thread t2(Push);
 
-#pragma region ThreadFunc
-    //t.hardware_concurrency(); // CPU 코어 개수
-    //t.get_id(); // thread마다 id
-    //t.detach(); // std::thread 객체에서 실제 thread를 분리
-    //t.joinable(); // thread가 실제 객체를 관리하는 thread인지를 확인
-#pragma endregion
-    vector<thread> v;
+    t1.join();
+    t2.join();
 
-    for (int32 i = 0; i < 10; ++i)
-    {
-        v.push_back(thread(HelloThread_2, i));
-    }
-
-    for (int32 i = 0; i < 10; ++i)
-    {
-        if (v[i].joinable())
-            v[i].join();
-    }
-
-    cout << "Hello Main" << endl;
-
+    cout << v.size() << endl;
 
     return 0;
 }
