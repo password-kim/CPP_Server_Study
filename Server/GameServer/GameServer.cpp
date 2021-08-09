@@ -5,6 +5,7 @@
 #include <atomic>
 #include <mutex>
 #include <algorithm>
+#include <Windows.h>
 
 #pragma region SpinLock
 
@@ -60,38 +61,64 @@ private:
 
 #pragma endregion
 
-int32 sum = 0;
-
 mutex m;
+queue<int32> q;
 
-SpinLock spinLock;
+HANDLE handle;
 
-void Add()
+void Producer()
 {
-    for (int32 i = 0; i < 100000; i++)
+    while (true)
     {
-        lock_guard<SpinLock> gaurd(spinLock);
-        sum++;
+        {
+            unique_lock<mutex> lock(m);
+            q.push(100);
+        }
+
+        ::SetEvent(handle);
+
+
+        this_thread::sleep_for(100000ms);
     }
 }
 
-void Sub()
+void Consumer()
 {
-    for (int32 i = 0; i < 100000; i++)
+    while (true)
     {
-        lock_guard<SpinLock> gaurd(spinLock);
-        sum--;
+        ::WaitForSingleObject(handle, INFINITE);
+        // Non-Signal 상태가됨.
+        // bManualRset을 True로 하였다면
+        // ::ResetEvent(handle)을 이용해 다시 Non-Signal상태로 바꿔줘야함.
+
+        unique_lock<mutex> lock(m);
+        if (q.empty() == false)
+        {
+            int32 data = q.front();
+            q.pop();
+            cout << data << endl;
+        }
     }
 }
 
 int main()
 {
-    thread t1(Add);
-    thread t2(Sub);
+#pragma region Kernel Object
+    /// <summary>
+    /// 커널 오브젝트
+    /// Usage Count
+    /// Signal (파란불) / Non-Signal (빨간불) << bool
+    /// Auto / Manual << bool
+    /// </summary>
+#pragma endregion
+    handle = ::CreateEvent(NULL/*보안속성*/, FALSE/*bManualReset*/, FALSE/*bInitialState*/, NULL);
+
+    thread t1(Producer);
+    thread t2(Consumer);
 
     t1.join();
     t2.join();
 
-    cout << sum << endl;
+    ::CloseHandle(handle);
 }
 
