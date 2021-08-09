@@ -38,6 +38,11 @@ public:
         while (_locked.compare_exchange_strong(expected, desired) == false)
         {
             expected = false;
+            
+            // Sleep! 
+            //this_thread::sleep_for(chrono::milliseconds(10));
+            this_thread::sleep_for(10ms);
+            //this_thread::yield();
         }
 
     }
