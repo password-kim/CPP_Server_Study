@@ -6,135 +6,109 @@
 #include <mutex>
 #include <algorithm>
 #include <Windows.h>
+#include <future>
 
-#pragma region SpinLock
+int64 Calculate()
+{
+	int64 sum = 0;
 
-class SpinLock
+	for (int32 i = 0; i < 100000; i++)
+	{
+		sum += i;
+	}
+
+	return sum;
+}
+
+class Knight
 {
 public:
-    void lock()
-    {
-        // CAS (Compare-And-Swap)
-
-        bool expected = false;
-        bool desired = true;
-
-#pragma region CAS 의사코드
-        /// <summary>
-        /// CAS 의사코드
-        /// if (_locked == expected)
-        /// {
-        ///     expected = _locked;
-        ///     _locked = desired;
-        ///     return true;
-        /// }
-        /// else
-        /// {
-        ///     expected = _locked;
-        ///     return false;
-        /// }
-        /// </summary>
-#pragma endregion 
-
-        while (_locked.compare_exchange_strong(expected, desired) == false)
-        {
-            expected = false;
-            
-            // Sleep! 
-            //this_thread::sleep_for(chrono::milliseconds(10));
-            this_thread::sleep_for(10ms);
-            //this_thread::yield();
-        }
-
-    }
-
-    void unlock()
-    {
-        //_locked = false;
-        _locked.store(false);
-    }
-
-
-private:
-    atomic<bool> _locked = false;
+	int64 GetHP() { return 100; }
 };
 
-#pragma endregion
-
-mutex m;
-queue<int32> q;
-HANDLE handle;
-
-// CV는 User-Level-Object (커널 오브젝트X)
-condition_variable cv;
-
-void Producer()
+void PromiseWorker(std::promise<string>&& promise)
 {
-    while (true)
-    {
-        // 1) Lock을 잡고
-        // 2) 공유 변수 값을 수정
-        // 3) Lock을 풀고
-        // 4) 조건변수를 통해 다른 쓰레드에게 통지
-
-
-        {
-            unique_lock<mutex> lock(m);
-            q.push(100);
-        }
-
-        cv.notify_one(); // wait중인 쓰레드가 있으면 딱 1개를 깨운다.
-
-        //::SetEvent(handle);
-
-
-        //this_thread::sleep_for(100000ms);
-    }
+	promise.set_value("Promise Message");
 }
 
-void Consumer()
+void TaskWorker(std::packaged_task<int64(void)>&& task)
 {
-    while (true)
-    {
-        unique_lock<mutex> lock(m);
-        cv.wait(lock, []() { return q.empty() == false; });
-        // 1) Lock을 잡고
-        // 2) 조건 확인
-        // -만족O => 빠져 나와서 이어서 코드를 진행
-        // -만족X => Lock을 풀어주고 대기 상태
-
-        //::WaitForSingleObject(handle, INFINITE);
-        // Non-Signal 상태가됨.
-        // bManualRset을 True로 하였다면
-        // ::ResetEvent(handle)을 이용해 다시 Non-Signal상태로 바꿔줘야함.
-
-        //while (q.empty() == false)
-        {
-            int32 data = q.front();
-            q.pop();
-            cout << q.size() << endl;
-        }
-    }
+	task();
 }
+
 
 int main()
 {
-#pragma region Kernel Object
-    /// <summary>
-    /// 커널 오브젝트
-    /// Usage Count
-    /// Signal (파란불) / Non-Signal (빨간불) << bool
-    /// Auto / Manual << bool
-    /// </summary>
-#pragma endregion
-    handle = ::CreateEvent(NULL/*보안속성*/, FALSE/*bManualReset*/, FALSE/*bInitialState*/, NULL);
+	// 동기(Synchronous) 실행
+	// int64 sum = Calculate();
+	// cout << sum << endl;
 
-    thread t1(Producer);
-    thread t2(Consumer);
+	// 비동기(Non-Synchronous) 실행
+	// std::future
+	{
+		/// <summary>
+		/// 1) deferred -> lazy evaluation 지연해서 실행.
+		/// 2) async -> 별도의 thread를 만들어서 실행.
+		/// 3) deferred | async -> 둘 중 알아서 실행.
+		/// </summary>
+		/// <returns></returns>
+		std::future<int64> future = std::async(std::launch::async, Calculate);
 
-    t1.join();
-    t2.join();
+		// TODO
+		// std::future_status status = future.wait_for(100ms);
 
-    ::CloseHandle(handle);
+		
+
+		int64 sum = future.get(); // 결과물이 이제서야 필요하다.
+	}
+
+
+	// 멤버함수도 활용가능
+	{
+		Knight knight;
+
+		std::future<int64> future = std::async(std::launch::async, &Knight::GetHP, knight);
+
+	}
+
+
+	// std::promise
+	{
+		std::promise<string> promise;
+		std::future<string> future = promise.get_future();
+
+		thread t(PromiseWorker, std::move(promise));
+
+		string message = future.get();
+		cout << message << endl;
+
+		t.join();
+	}
+
+
+	// std::pakaged_task
+	{
+		std::packaged_task<int64(void)> task(Calculate);
+		std::future<int64> future = task.get_future();
+
+		std::thread t(TaskWorker, std::move(task));
+
+		int64 sum = future.get();
+		cout << sum << endl;
+
+		t.join();
+	}
+
+	// 결론)
+	// mutex, condition_variable를 쓰지 않고 단순한 것들을 처리할 수 있는 방법.
+	// 특히나, 한 번 발생하는 이벤트에 유용하다!
+	
+	// 1) async
+	// -> 원하는 함수를 비동기적으로 실행.
+	// 2) promise
+	// -> 결과물을 promise를 통해 future로 받아줌.
+	// 3) packaged_task
+	// -> 원하는 함수의 실행 결과를 packaged_task를 통해 future로 받아줌.
+
 }
 
