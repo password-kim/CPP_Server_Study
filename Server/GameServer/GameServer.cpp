@@ -8,107 +8,51 @@
 #include <Windows.h>
 #include <future>
 
-int64 Calculate()
+atomic<bool> ready;
+int32 value;
+
+
+void Producer()
 {
-	int64 sum = 0;
-
-	for (int32 i = 0; i < 100000; i++)
-	{
-		sum += i;
-	}
-
-	return sum;
+	value = 10;
+	ready.store(true, memory_order::memory_order_seq_cst);
 }
 
-class Knight
+void Consumer()
 {
-public:
-	int64 GetHP() { return 100; }
-};
+	while (ready.load(memory_order::memory_order_seq_cst) == false)
+		;
 
-void PromiseWorker(std::promise<string>&& promise)
-{
-	promise.set_value("Promise Message");
-}
-
-void TaskWorker(std::packaged_task<int64(void)>&& task)
-{
-	task();
+	cout << value << endl;
 }
 
 
 int main()
 {
-	// 동기(Synchronous) 실행
-	// int64 sum = Calculate();
-	// cout << sum << endl;
+	ready = false;
+	value = 0;
+	thread t1(Producer);
+	thread t2(Consumer);
+	t1.join();
+	t2.join();
 
-	// 비동기(Non-Synchronous) 실행
-	// std::future
-	{
-		/// <summary>
-		/// 1) deferred -> lazy evaluation 지연해서 실행.
-		/// 2) async -> 별도의 thread를 만들어서 실행.
-		/// 3) deferred | async -> 둘 중 알아서 실행.
-		/// </summary>
-		/// <returns></returns>
-		std::future<int64> future = std::async(std::launch::async, Calculate);
+	// Memory Model (정책)
+	// 1) Sequentially Consistent (seq_cst)
+	// 2) Acquire-Release (acquire, release)
+	// 3) Relaxed (relaxed)
 
-		// TODO
-		// std::future_status status = future.wait_for(100ms);
+	// 1) seq_cst (가장 엄격 = 컴파일러 최적화 여지 적음 = 직관적)
+	// => 가시성 문제 해결! 코드 재배치 바로 해결!
 
-		
+	// 2) acquire-release
+	// => 딱 중간!
+	// => release명령 이전의 메모리 명령들이, 해당 명령 이후로 재배치 되는 것을 방지
+	// => 그리고 acquire로 같은 변수를 읽는 쓰레드가 있다면, release 이전의 명령들이 acquire하는 순간에 관찰 가능 (가시성 보장)
 
-		int64 sum = future.get(); // 결과물이 이제서야 필요하다.
-	}
-
-
-	// 멤버함수도 활용가능
-	{
-		Knight knight;
-
-		std::future<int64> future = std::async(std::launch::async, &Knight::GetHP, knight);
-
-	}
-
-
-	// std::promise
-	{
-		std::promise<string> promise;
-		std::future<string> future = promise.get_future();
-
-		thread t(PromiseWorker, std::move(promise));
-
-		string message = future.get();
-		cout << message << endl;
-
-		t.join();
-	}
-
-
-	// std::pakaged_task
-	{
-		std::packaged_task<int64(void)> task(Calculate);
-		std::future<int64> future = task.get_future();
-
-		std::thread t(TaskWorker, std::move(task));
-
-		int64 sum = future.get();
-		cout << sum << endl;
-
-		t.join();
-	}
-
-	// 결론)
-	// mutex, condition_variable를 쓰지 않고 단순한 것들을 처리할 수 있는 방법.
-	// 특히나, 한 번 발생하는 이벤트에 유용하다!
+	// 3) relaxed (자유롭다 = 컴파일러 최적화 여지 많음 = 직관적x)
+	// => 너무나도 자유롭다!
+	// => 코드 재배치도 멋대로 가능! 가시성 해결 NO!
+	// => 가장 기본 조건 (동일 객체에  대한 동일 관전 순서만 보장)
 	
-	// 1) async
-	// -> 원하는 함수를 비동기적으로 실행.
-	// 2) promise
-	// -> 결과물을 promise를 통해 future로 받아줌.
-	// 3) packaged_task
-	// -> 원하는 함수의 실행 결과를 packaged_task를 통해 future로 받아줌.
-
 }
 
