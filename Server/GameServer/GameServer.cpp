@@ -7,37 +7,39 @@
 #include <algorithm>
 #include <Windows.h>
 #include <future>
+#include "ConcurrentQueue.h"
+#include "ConcurrentStack.h"
 
-// LTS (Local Thread Storage)
-// => thread마다 갖고 있는 각각의 storage.
+LockQueue<int32> q;
+LockStack<int32> s;
 
-thread_local int32 LThreadID = 0; // 각각의 thread가 데이터를 가져가서 사용가능.
-
-void ThreadMain(int32 threadid)
+void Push()
 {
-	LThreadID = threadid;
-
 	while (true)
 	{
-		cout << "Hi! I'm Thread " << LThreadID << endl;
-		this_thread::sleep_for(1s);
+		int32 value = rand() % 100;
+		q.Push(value);
+
+		this_thread::sleep_for(10ms);
+	}
+}
+
+void Pop()
+{
+	while (true)
+	{
+		int32 data = 0;
+		if(q.TryPop(OUT data))
+			cout << data << endl;
 	}
 }
 
 int main()
 {
-	vector<thread> threads;
+	thread t1(Push);
+	thread t2(Pop);
 
-	for (int32 i = 0; i < 10; i++)
-	{
-		int32 threadId = i + 1;
-		threads.push_back(thread(ThreadMain, threadId));
-	}
-	
-	for (thread& T : threads)
-	{
-		T.join();
-	}
-
+	t1.join();
+	t2.join();
 }
 
