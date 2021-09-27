@@ -7,39 +7,26 @@
 #include <algorithm>
 #include <Windows.h>
 #include <future>
-#include "ConcurrentQueue.h"
-#include "ConcurrentStack.h"
+#include "ThreadManager.h"
 
-LockFreeQueue<int32> q;
-LockFreeStack<int32> s;
+CoreGlobal Core;
 
-void Push()
+void ThreadMain()
 {
 	while (true)
 	{
-		int32 value = rand() % 100;
-		s.Push(value);
-
-		this_thread::sleep_for(10ms);
-	}
-}
-
-void Pop()
-{
-	while (true)
-	{
-		auto data = s.TryPop();
-		if (data != nullptr)
-			cout << (*data) << endl;
+		cout << "Hello! I'm thread " << LThreadId << endl;
+		this_thread::sleep_for(1s);
 	}
 }
 
 int main()
 {
-	thread t1(Push);
-	thread t2(Pop);
+	for (int32 i = 0; i < 5; i++)
+	{
+		GThreadManager->Launch(ThreadMain);
+	}
 
-	t1.join();
-	t2.join();
+	GThreadManager->Join();
 }
 
