@@ -11,7 +11,14 @@
 #include "RefCounting.h"
 #include "Memory.h"
 
-class Knight
+class Player
+{
+public:
+	Player() {}
+	virtual ~Player() {}
+};
+
+class Knight : public Player
 {
 public:
 	Knight()
@@ -29,14 +36,16 @@ public:
 		cout << "~Knight()" << endl;
 	}
 
-public:
 	int32 _hp = 100;
 	int32 _mp = 10;
 };
 
 int main()
 {
-	Knight* knight = xnew<Knight>(100);
+	// [                    [   ]]
+	Knight* knight = (Knight*)xnew<Player>();
+
+	//knight->_hp = 100; // <-- Error Code..
 
 	xdelete(knight);
 }
