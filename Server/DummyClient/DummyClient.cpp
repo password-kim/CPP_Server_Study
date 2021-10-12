@@ -26,7 +26,6 @@ int main()
         return 0;
     }
 
-    // 연결할 목적지는? (IP주소 + Port) -> XX 아파트 YY 호
     SOCKADDR_IN serverAddr; // IPv4
     ::memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
@@ -54,8 +53,36 @@ int main()
     while (true)
     {
         // TODO
+        char sendBuffer[100] = "Hello World!";
 
-        this_thread::sleep_for(1s);
+        for (int32 i = 0; i < 10; i++)
+        {
+            int32 resultCode = ::send(clientSocket, sendBuffer, sizeof(sendBuffer), 0);
+            if (resultCode == SOCKET_ERROR)
+            {
+                int32 errCode = ::WSAGetLastError();
+                cout << "Send ErrorCode : " << errCode << endl;
+                return 0;
+            }
+        }
+
+        cout << "Send Data! Len = " << sizeof(sendBuffer) << endl;
+
+        /*char recvBuffer[1000];
+
+        int32 recvLen = ::recv(clientSocket, recvBuffer, sizeof(recvBuffer), 0);
+        if (recvLen <= 0)
+        {
+            int32 errCode = ::WSAGetLastError();
+            cout << "Recv ErrorCode : " << errCode << endl;
+            return 0;
+        }
+
+        cout << "Recv Data! Data = " << recvBuffer << endl;
+        cout << "Recv Data! Len = " << recvLen << endl;
+
+        this_thread::sleep_for(1s);*/
+
     }
 
     // ---------------------------
