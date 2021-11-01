@@ -98,7 +98,7 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 {
 	SessionRef session = acceptEvent->session;
 
-	if (SocketUtils::SetUpdateAcceptSocket(session->GetSocket(), _socket) == false)
+	if (false == SocketUtils::SetUpdateAcceptSocket(session->GetSocket(), _socket))
 	{
 		RegisterAccept(acceptEvent);
 		return;
@@ -113,10 +113,6 @@ void Listener::ProcessAccept(AcceptEvent* acceptEvent)
 	}
 
 	session->SetNetAddress(NetAddress(sockAddress));
-
-	cout << "Client Connected!" << endl;
-
-	// TODO
-
+	session->ProcessConnect();
 	RegisterAccept(acceptEvent);
 }
