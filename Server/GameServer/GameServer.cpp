@@ -1,21 +1,16 @@
 ﻿#include "pch.h"
-#include <iostream>
-#include "CorePch.h"
-#include <thread>
-#include <atomic>
-#include <mutex>
-#include <algorithm>
-#include <Windows.h>
-#include <future>
 #include "ThreadManager.h"
-
 #include "Service.h"
 #include "Session.h"
 
-// TEMP
 class GameSession : public Session
 {
 public:
+	~GameSession()
+	{
+		cout << "~GameSession" << endl;
+	}
+
 	virtual int32 OnRecv(BYTE* buffer, int32 len) override
 	{
 		// Echo
@@ -35,7 +30,7 @@ int main()
 	ServerServiceRef service = MakeShared<ServerService>(
 		NetAddress(L"127.0.0.1", 7777),
 		MakeShared<IocpCore>(),
-		MakeShared<GameSession>, // TODO : SessionManager ..etc
+		MakeShared<GameSession>, // TODO : SessionManager 등
 		100);
 
 	ASSERT_CRASH(service->Start());
