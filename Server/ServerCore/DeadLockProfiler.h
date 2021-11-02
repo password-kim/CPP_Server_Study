@@ -20,10 +20,9 @@ private:
 private:
 	unordered_map<const char*, int32>	_nameToId;
 	unordered_map<int32, const char*>	_idToName;
-	stack<int32>						_lockStack;
 	map<int32, set<int32>>				_lockHistory;
 
-	Mutex _lock;
+	Mutex								_lock;
 
 private:
 	vector<int32>	_discoveredOrder;		// 노드가 발견된 순서를 기록하는 배열
