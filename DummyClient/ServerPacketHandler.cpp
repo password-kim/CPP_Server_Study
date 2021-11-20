@@ -37,5 +37,3 @@ bool Handle_S_LOGIN(PacketSessionRef& session, Protocol::S_LOGIN& pkt)
 {
 	return true;
 }
-
-

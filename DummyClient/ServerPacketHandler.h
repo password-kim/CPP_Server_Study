@@ -14,8 +14,8 @@ enum : uint16
 
 // Custom Handlers
 bool Handle_INVALID(PacketSessionRef& session, BYTE* buffer, int32 len);
-bool Handle_S_TEST(PacketSessionRef& session, Protocol::S_TEST&pkt);
-bool Handle_S_LOGIN(PacketSessionRef& session, Protocol::S_LOGIN&pkt);
+bool Handle_S_TEST(PacketSessionRef& session, Protocol::S_TEST& pkt);
+bool Handle_S_LOGIN(PacketSessionRef& session, Protocol::S_LOGIN& pkt);
 
 class ServerPacketHandler
 {
@@ -28,17 +28,17 @@ public:
 		GPacketHandler[PKT_S_LOGIN] = [](PacketSessionRef& session, BYTE* buffer, int32 len) { return HandlePacket<Protocol::S_LOGIN>(Handle_S_LOGIN, session, buffer, len); };
 	}
 
-	static bool HandlePacket(PacketSessionRef & session, BYTE * buffer, int32 len)
+	static bool HandlePacket(PacketSessionRef& session, BYTE* buffer, int32 len)
 	{
 		PacketHeader* header = reinterpret_cast<PacketHeader*>(buffer);
 		return GPacketHandler[header->id](session, buffer, len);
 	}
-	static SendBufferRef MakeSendBuffer(Protocol::C_TEST&pkt) { return MakeSendBuffer(pkt, PKT_C_TEST); }
-	static SendBufferRef MakeSendBuffer(Protocol::C_MOVE&pkt) { return MakeSendBuffer(pkt, PKT_C_MOVE); }
+	static SendBufferRef MakeSendBuffer(Protocol::C_TEST& pkt) { return MakeSendBuffer(pkt, PKT_C_TEST); }
+	static SendBufferRef MakeSendBuffer(Protocol::C_MOVE& pkt) { return MakeSendBuffer(pkt, PKT_C_MOVE); }
 
 private:
 	template<typename PacketType, typename ProcessFunc>
-	static bool HandlePacket(ProcessFunc func, PacketSessionRef & session, BYTE * buffer, int32 len)
+	static bool HandlePacket(ProcessFunc func, PacketSessionRef& session, BYTE* buffer, int32 len)
 	{
 		PacketType pkt;
 		if (pkt.ParseFromArray(buffer + sizeof(PacketHeader), len - sizeof(PacketHeader)) == false)
@@ -48,7 +48,7 @@ private:
 	}
 
 	template<typename T>
-	static SendBufferRef MakeSendBuffer(T & pkt, uint16 pktId)
+	static SendBufferRef MakeSendBuffer(T& pkt, uint16 pktId)
 	{
 		const uint16 dataSize = static_cast<uint16>(pkt.ByteSizeLong());
 		const uint16 packetSize = dataSize + sizeof(PacketHeader);
