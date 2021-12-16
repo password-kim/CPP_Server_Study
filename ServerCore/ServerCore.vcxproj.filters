@@ -2,19 +2,22 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Network">
-      <UniqueIdentifier>{078b2113-3782-4182-a098-50d89b1562d5}</UniqueIdentifier>
+      <UniqueIdentifier>{44015ff7-f5fe-4ecb-9510-ba792e92d6c2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Utils">
-      <UniqueIdentifier>{4a89f502-bcba-4bb0-9fda-996f9791259d}</UniqueIdentifier>
+      <UniqueIdentifier>{1c94faf8-d38f-44b3-b3f3-39ba3c6951e1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Main">
-      <UniqueIdentifier>{a2b2f767-ab0c-4690-8f9f-545f42da1760}</UniqueIdentifier>
+      <UniqueIdentifier>{c0b75513-7471-4500-a833-2626c5040f9c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Thread">
-      <UniqueIdentifier>{531e1da3-2eb1-4d88-aa39-05e9a1470c6d}</UniqueIdentifier>
+      <UniqueIdentifier>{0a8a1a96-3bcc-4f5b-ac25-3388457fad31}</UniqueIdentifier>
     </Filter>
     <Filter Include="Memory">
-      <UniqueIdentifier>{f5e54f9d-f7f0-4c25-8da8-d63106f06d01}</UniqueIdentifier>
+      <UniqueIdentifier>{903143c9-12f7-436d-8004-490b4f0d31bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Job">
+      <UniqueIdentifier>{92c8d166-b3a6-4c52-843f-5f9bbaeeb457}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -66,22 +69,22 @@
     <ClInclude Include="TypeCast.h">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="SocketUtils.h">
-      <Filter>Network</Filter>
-    </ClInclude>
     <ClInclude Include="NetAddress.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="SocketUtils.h">
+      <Filter>Network</Filter>
+    </ClInclude>
     <ClInclude Include="IocpCore.h">
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="IocpEvent.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Listener.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Session.h">
-      <Filter>Network</Filter>
-    </ClInclude>
-    <ClInclude Include="IocpEvent.h">
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Service.h">
@@ -93,11 +96,20 @@
     <ClInclude Include="SendBuffer.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="BufferWriter.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
     <ClInclude Include="BufferReader.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="BufferWriter.h">
-      <Filter>Utils</Filter>
+    <ClInclude Include="Job.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="JobQueue.h">
+      <Filter>Job</Filter>
+    </ClInclude>
+    <ClInclude Include="JobSerializer.h">
+      <Filter>Job</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +178,15 @@
     </ClCompile>
     <ClCompile Include="BufferWriter.cpp">
       <Filter>Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Job.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="JobQueue.cpp">
+      <Filter>Job</Filter>
+    </ClCompile>
+    <ClCompile Include="JobSerializer.cpp">
+      <Filter>Job</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -22,11 +22,20 @@ void Service::CloseService()
 	// TODO
 }
 
+void Service::Broadcast(SendBufferRef sendBuffer)
+{
+	WRITE_LOCK;
+	for (const auto& session : _sessions)
+	{
+		session->Send(sendBuffer);
+	}
+}
+
 SessionRef Service::CreateSession()
 {
 	SessionRef session = _sessionFactory();
 	session->SetService(shared_from_this());
-	
+
 	if (_iocpCore->Register(session) == false)
 		return nullptr;
 

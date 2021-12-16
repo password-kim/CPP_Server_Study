@@ -45,10 +45,10 @@ class StlAllocator
 public:
 	using value_type = T;
 
-	StlAllocator() {}
+	StlAllocator() { }
 
 	template<typename Other>
-	StlAllocator(const StlAllocator<Other>&) {}
+	StlAllocator(const StlAllocator<Other>&) { }
 
 	T* allocate(size_t count)
 	{

@@ -87,11 +87,11 @@ class Conversion
 {
 private:
 	using Small = __int8;
-	using Big	= __int32;
+	using Big = __int32;
 
-	static Small	Test(const To&) { return 0; }
-	static Big		Test(...)		{ return 0; }
-	static From		MakeFrom()		{ return 0; }
+	static Small Test(const To&) { return 0; }
+	static Big Test(...) { return 0; }
+	static From MakeFrom() { return 0; }
 
 public:
 	enum

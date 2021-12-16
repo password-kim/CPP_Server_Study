@@ -7,7 +7,7 @@
 #include "SendBuffer.h"
 
 ThreadManager*		GThreadManager = nullptr;
-Memory*				GMemory	= nullptr;
+Memory*				GMemory = nullptr;
 SendBufferManager*	GSendBufferManager = nullptr;
 
 DeadLockProfiler*	GDeadLockProfiler = nullptr;

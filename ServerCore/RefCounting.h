@@ -7,9 +7,8 @@
 class RefCountable
 {
 public:
-	RefCountable() : _refCount(1) {}
-	// 메모리누수를 방지하기위해 최상위클래스의 소멸자엔 virtual을 붙여줌.
-	virtual ~RefCountable() {} 
+	RefCountable() : _refCount(1) { }
+	virtual ~RefCountable() { }
 
 	int32 GetRefCount() { return _refCount; }
 
@@ -36,7 +35,7 @@ template<typename T>
 class TSharedPtr
 {
 public:
-	TSharedPtr() {}
+	TSharedPtr() { }
 	TSharedPtr(T* ptr) { Set(ptr); }
 
 	// 복사
@@ -75,11 +74,11 @@ public:
 	bool		operator!=(const TSharedPtr& rhs) const { return _ptr != rhs._ptr; }
 	bool		operator!=(T* ptr) const { return _ptr != ptr; }
 	bool		operator<(const TSharedPtr& rhs) const { return _ptr < rhs._ptr; }
-	T* operator*() { return _ptr; }
-	const T* operator*() const { return _ptr; }
-	operator T* () const { return _ptr; }
-	T* operator->() { return _ptr; }
-	const T* operator->() const { return _ptr; }
+	T*			operator*() { return _ptr; }
+	const T*	operator*() const { return _ptr; }
+				operator T* () const { return _ptr; }
+	T*			operator->() { return _ptr; }
+	const T*	operator->() const { return _ptr; }
 
 	bool IsNull() { return _ptr == nullptr; }
 
@@ -101,6 +100,5 @@ private:
 	}
 
 private:
-	// RefCnt가 지원되는 클래스를 카리키는 포인터.
 	T* _ptr = nullptr;
 };
