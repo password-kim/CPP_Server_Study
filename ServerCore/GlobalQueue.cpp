@@ -24,3 +24,4 @@ JobQueueRef GlobalQueue::Pop()
 {
 	return _jobQueues.Pop();
 }
+
